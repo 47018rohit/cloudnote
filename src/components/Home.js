@@ -1,19 +1,20 @@
 import React from 'react'
+import { Link } from 'react-router-dom'
 import Notes from './Notes'
 
-
-export default function Home() {
-  
+export default function Home(props) {
+  const { showAlert } = props
 
   return (
-    <div className='container my-4'>
-      <div class="mb-3">
-        <h2>Add Notes</h2>
-        <textarea className="form-control" id="exampleFormControlTextarea1" rows="10"></textarea>
-      </div>
-      <div class="mb-3">
-        <Notes />
-      </div>
+    <div className='container mb-3 my-4'>
+      {
+        localStorage.getItem('token') ?
+          <Notes showAlert={showAlert} /> :
+          <div className='d-flex justify-content-center'>
+            <Link className="btn btn-primary mx-2" to="/login" role="button">Login</Link>
+            <Link className="btn btn-primary" to="/signup" role="button">Sign Up</Link>
+          </div>
+      }
     </div>
   )
 }

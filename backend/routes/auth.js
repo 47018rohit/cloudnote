@@ -18,18 +18,18 @@ router.post('/createuser', [
 
 ],
     async (req, res) => {
-
         // if errors occur , show bad request and errors
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
             return res.status(400).json({ errors: errors.array() });
         }
-
+        
         try {
+            let success = false;
             // check whether the user with same email exists already
             let user = await User.findOne({ email: req.body.email })
             if (user) {
-                return res.status(400).json({ error: "Seems like email already exists" })
+                return res.status(400).json({success, error: "Seems like email already exists" })
             }
             // creating secure pass
             const salt = await bcrypt.genSaltSync(10)
@@ -48,7 +48,8 @@ router.post('/createuser', [
                 }
             }
             const token = jwt.sign(data, JWT_SECRET)
-            res.json({ token })
+            success = true
+            res.json({success, token })
         } catch (error) {        //to catch error and show other than duplicate email
             console.error(error.message)
             res.status(500).send('Internal Server Error')
@@ -64,6 +65,7 @@ router.post('/login', [
 ],
     async (req, res) => {
         // if errors occur , show bad request and errors
+        let success = false;
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
             return res.status(400).json({ errors: errors.array() });
@@ -73,12 +75,14 @@ router.post('/login', [
         try {
             let user = await User.findOne({ email })
             if (!user) {
-                res.status(400).json('Please enter correct credentials')
+                // success = false
+                res.status(400).json({ success, error: 'Please enter correct credentials' })
             }
             // comparing the password
             const comparePassword = await bcrypt.compare(password, user.password)
             if (!comparePassword) {
-                res.status(400).json('Please enter correct credentials')
+                // success = false
+                res.status(400).json({ success, error: 'Please enter correct credentials' })
             }
 
             const data = {
@@ -87,7 +91,8 @@ router.post('/login', [
                 }
             }
             const token = jwt.sign(data, JWT_SECRET)
-            res.json({ token })
+            success = true
+            res.json({ success, token })
 
         } catch (error) {        //to catch error and show other than duplicate email
             console.error(error.message)
